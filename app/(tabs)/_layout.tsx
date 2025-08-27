@@ -1,6 +1,7 @@
 
 // UPDATE app/(tabs)/_layout.tsx - MINIMAL padding fix
 
+import { HamburgerButton } from '@/components/HamburgerButton';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Tabs } from 'expo-router';
@@ -39,7 +40,7 @@ export default function TabLayout() {
         },
       }}
     >
-      <Tabs.Screen
+      <Tabs.Screen      
         name="history"
         options={{
           title: 'History',
@@ -47,6 +48,7 @@ export default function TabLayout() {
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="time-outline" size={size} color={color} />
           ),
+          headerRight: () => <HamburgerButton />,
         }}
       />
       <Tabs.Screen

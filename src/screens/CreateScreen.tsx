@@ -1,3 +1,4 @@
+import { supabase } from '@/services/supabase';
 import { generateId } from '@/utils/id';
 import { Ionicons } from '@expo/vector-icons';
 import BottomSheet from '@gorhom/bottom-sheet';
@@ -385,6 +386,42 @@ export default function CreateScreen() {
 
   return (
     <View style={styles.container}>
+      <TouchableOpacity
+        onPress={async () => {
+          console.log('🧪 Testing Supabase...');
+          
+          // Test 1: Auth
+          const { data: { user } } = await supabase.auth.getUser();
+          console.log('Auth user:', user?.id);
+          
+          // Test 2: Direct query
+          const { data, error } = await supabase
+            .from('user_profiles')
+            .select('id, email, display_name')
+            .limit(1);
+          console.log('Query result:', { data, error });
+          
+          // Test 3: Your specific profile
+          if (user) {
+            const { data: profile, error: profileError } = await supabase
+              .from('user_profiles')
+              .select('*')
+              .eq('id', user.id)
+              .maybeSingle();
+            console.log('Your profile:', { profile, profileError });
+          }
+        }}
+        style={{
+          backgroundColor: '#34C759',
+          padding: 15,
+          margin: 20,
+          borderRadius: 8,
+        }}
+      >
+        <Text style={{ color: 'white', textAlign: 'center', fontWeight: '600' }}>
+          Test Supabase Connection
+        </Text>
+      </TouchableOpacity>
       <ScrollView
         style={styles.mainContent}
         contentContainerStyle={styles.mainContentContainer}
