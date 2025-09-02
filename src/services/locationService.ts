@@ -2,6 +2,8 @@ import * as Location from 'expo-location';
 
 import { LocationData } from '@/types/journal';
 
+export default LocationData;
+
 export async function getCurrentLocation(): Promise<LocationData | null> {
   try {
     const { status } = await Location.requestForegroundPermissionsAsync();
@@ -49,11 +51,18 @@ export async function getCurrentLocation(): Promise<LocationData | null> {
 /**
  * Format location for display
  */
-export function formatLocationName(location: LocationData): string {
-  if (location.city && location.country) {
-    return `${location.city}, ${location.country}`;
+export function formatLocationName(fullLocationData: LocationData): string {
+  let locationData = fullLocationData.locationData;
+  if (!locationData) return '';
+
+  let address = locationData.address;
+  if (!address) return '';
+  if (address.city && address.country) {
+    return `${address.city}, ${address.country}`;
   }
-  if (location.city) return location.city;
-  if (location.name) return location.name;
+  if (address.city) return address.city;
+
+
+  if (locationData.place?.name) return locationData.place?.name;
   return 'Location tagged';
 }

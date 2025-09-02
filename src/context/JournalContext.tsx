@@ -1,6 +1,7 @@
+import { entriesService } from '@/services/entries';
+import { supabase } from '@/services/supabase';
+import { Entry } from '@/types/journal';
 import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
-import { entriesService } from '../services/entries';
-import { Entry } from '../types/journal';
 
 interface JournalContextType {
   entries: Entry[];
@@ -20,19 +21,25 @@ export function JournalProvider({ children }: { children: React.ReactNode }) {
   const refreshEntries = useCallback(async () => {
     setIsLoading(true);
     try {
-      const loadedEntries = await entriesService.listEntries();
-      setEntries(loadedEntries);
-    } catch (error) {
-      console.error('Failed to refresh entries:', error);
+      const { data, error } = await supabase.auth.getUser();
+      if (error || !data?.user) {
+        setEntries([]);
+        return;
+      }
+      const loaded = await entriesService.listEntries();
+      setEntries(loaded);
+    } catch (err) {
+      console.error('Failed to refresh entries:', err);
+      setEntries([]);
     } finally {
       setIsLoading(false);
     }
   }, []);
 
   const createEntry = useCallback(async (data: Partial<Entry>) => {
-    const entry = await entriesService.createEntry(data);
+    const e = await entriesService.createEntry(data);
     await refreshEntries();
-    return entry;
+    return e;
   }, [refreshEntries]);
 
   const updateEntry = useCallback(async (id: string, updates: Partial<Entry>) => {
@@ -45,30 +52,24 @@ export function JournalProvider({ children }: { children: React.ReactNode }) {
     await refreshEntries();
   }, [refreshEntries]);
 
+  useEffect(() => { refreshEntries(); }, [refreshEntries]);
+
   useEffect(() => {
-    refreshEntries();
+    const { data: sub } = supabase.auth.onAuthStateChange(() => {
+      refreshEntries();
+    });
+    return () => { sub.subscription.unsubscribe(); };
   }, [refreshEntries]);
 
   return (
-    <JournalContext.Provider
-      value={{
-        entries,
-        isLoading,
-        refreshEntries,
-        createEntry,
-        updateEntry,
-        deleteEntry,
-      }}
-    >
+    <JournalContext.Provider value={{ entries, isLoading, refreshEntries, createEntry, updateEntry, deleteEntry }}>
       {children}
     </JournalContext.Provider>
   );
 }
 
 export function useJournal() {
-  const context = useContext(JournalContext);
-  if (!context) {
-    throw new Error('useJournal must be used within JournalProvider');
-  }
-  return context;
+  const ctx = useContext(JournalContext);
+  if (!ctx) throw new Error('useJournal must be used within JournalProvider');
+  return ctx;
 }

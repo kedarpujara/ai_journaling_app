@@ -1,9 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
 import {
-  StyleSheet,
-  Switch, Text,
-  TextInput, View
+  StyleSheet, Text, View
 } from 'react-native';
 import { theme } from '../../src/constants/theme';
 import { storageService } from '../../src/services/storage/asyncStorage';
@@ -26,21 +24,21 @@ export default function AssistantTab() {
           identify patterns, and provide insights about your journey.
         </Text>
         
-        <TextInput
+        {/* <TextInput
           style={styles.input}
           placeholder="Ask me anything..."
           placeholderTextColor={theme.colors.muted}
           editable={false}
-        />
+        /> */}
         
-        <View style={styles.notifyContainer}>
+        {/* <View style={styles.notifyContainer}>
           <Text style={styles.notifyText}>Notify me when ready</Text>
           <Switch
             value={notifyEnabled}
             onValueChange={handleNotifyToggle}
             trackColor={{ false: theme.colors.border, true: theme.colors.primary }}
           />
-        </View>
+        </View> */}
       </View>
     </View>
   );
